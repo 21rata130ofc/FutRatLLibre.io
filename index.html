@@ -416,10 +416,35 @@
             .eventos-grid { flex-direction: column; }
             header { padding: 16px 24px; }
         }
+        /* MENÚ DESPLEGABLE DEPORTES (Móvil) */
+        .sports-menu-toggle {
+            display: none; flex-direction: column; gap: 6px; cursor: pointer;
+            position: absolute; right: 100px; background: transparent; border: none;
+            padding: 8px;
+        }
+        .sports-menu-toggle span { width: 20px; height: 2px; background-color: var(--text-main); transition: var(--transition-smooth); }
+
+        .sports-dropdown {
+            position: fixed; top: 68px; right: 0; background: #07090ec7; backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); width: 200px; border-left: 1px solid rgba(255, 255, 255, 0.05);
+            max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
+            z-index: 999;
+        }
+        .sports-dropdown.active { max-height: 300px; }
+        .sports-dropdown a {
+            display: block; padding: 16px 24px; color: var(--text-muted); text-decoration: none;
+            font-size: 0.95em; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: var(--transition-smooth); cursor: pointer;
+        }
+        .sports-dropdown a:hover, .sports-dropdown a.active {
+            color: var(--text-main); background: rgba(255, 87, 34, 0.1);
+        }
+
         @media (max-width: 768px) {
             .agenda-iframe-wrapper iframe, iframe.player-iframe { height: 420px; }
             .hamburger { display: flex; }
             .header-tabs { display: none; }
+            .sports-menu-toggle { display: flex; }
             
             nav {
                 position: fixed; top: 68px; left: -100%; flex-direction: column;
@@ -434,6 +459,10 @@
             .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(6px, 6px); }
             .hamburger.active span:nth-child(2) { opacity: 0; }
             .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+            .sports-menu-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+            .sports-menu-toggle.active span:nth-child(2) { opacity: 0; }
+            .sports-menu-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
 
             .main-tabs { gap: 0; border-bottom: none; }
             .main-tab-btn { flex: 1; border-bottom: none; border-radius: 8px; padding: 12px 16px; font-size: 0.9em; }
@@ -466,6 +495,16 @@
             <button class="header-tab-btn" onclick="switchMainTab('ufc')" id="header-tab-ufc">
                 <i class="fas fa-fist-raised"></i> UFC
             </button>
+        </div>
+
+        <!-- Menú deportes (móvil) -->
+        <div class="sports-menu-toggle" id="sportsMenuToggle">
+            <span></span><span></span><span></span>
+        </div>
+        <div class="sports-dropdown" id="sportsDropdown">
+            <a onclick="switchMainTabMobile('futbol')"><i class="fas fa-futbol"></i> Fútbol</a>
+            <a onclick="switchMainTabMobile('otros')"><i class="fas fa-tv"></i> Otros Deportes</a>
+            <a onclick="switchMainTabMobile('ufc')"><i class="fas fa-fist-raised"></i> UFC</a>
         </div>
 
         <nav id="navbar">
@@ -932,6 +971,14 @@
             }
         }
 
+        // Cambiar pestañas desde el menú móvil (Otros Deportes / UFC)
+        function switchMainTabMobile(tab) {
+            switchMainTab(tab);
+            // Cerrar el dropdown
+            document.getElementById('sportsDropdown').classList.remove('active');
+            document.getElementById('sportsMenuToggle').classList.remove('active');
+        }
+
         // Lógica de Tabs / Selección de países (Fútbol)
         function showPais(pais) {
             document.querySelectorAll('.pais-panel').forEach(p => p.classList.remove('active'));
@@ -1063,47 +1110,63 @@
             setTimeout(() => { icon.style.transform = 'rotate(0deg)'; }, 800);
         }
 
-        // Navegación en Dispositivos Móviles (Hamburgo)
-        const hamburger = document.getElementById('hamburger');
-        const navbar = document.getElementById('navbar');
-        
-        hamburger.addEventListener('click', () => {
-            navbar.classList.toggle('active');
-            hamburger.classList.toggle('active');
-        });
-
-        // Evento de Cierre del Menú Móvil tras hacer clic
-        navbar.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navbar.classList.remove('active');
-                hamburger.classList.remove('active');
-                
-                navbar.querySelectorAll('a').forEach(el => el.classList.remove('active'));
-                link.classList.add('active');
-            });
-        });
-
-        // Quitar Preloader
-        window.addEventListener('load', () => {
-            const preloader = document.getElementById('preloader');
-            preloader.classList.add('hidden');
-        });
-
-        // Botón Volver Arriba
-        const backToTopButton = document.getElementById('backToTop');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 400) {
-                backToTopButton.classList.add('visible');
-            } else {
-                backToTopButton.classList.remove('visible');
-            }
-        });
-        backToTopButton.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-
-        // Observer para animaciones en scroll
+        // Ejecutar todo cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', () => {
+            // Navegación en Dispositivos Móviles (Hamburgo)
+            const hamburger = document.getElementById('hamburger');
+            const navbar = document.getElementById('navbar');
+            
+            if (hamburger && navbar) {
+                hamburger.addEventListener('click', () => {
+                    navbar.classList.toggle('active');
+                    hamburger.classList.toggle('active');
+                });
+
+                // Evento de Cierre del Menú Móvil tras hacer clic
+                navbar.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navbar.classList.remove('active');
+                        hamburger.classList.remove('active');
+                        
+                        navbar.querySelectorAll('a').forEach(el => el.classList.remove('active'));
+                        link.classList.add('active');
+                    });
+                });
+            }
+
+            // Menú desplegable de Deportes (Móvil)
+            const sportsMenuToggle = document.getElementById('sportsMenuToggle');
+            const sportsDropdown = document.getElementById('sportsDropdown');
+
+            if (sportsMenuToggle && sportsDropdown) {
+                sportsMenuToggle.addEventListener('click', () => {
+                    sportsDropdown.classList.toggle('active');
+                    sportsMenuToggle.classList.toggle('active');
+                });
+
+                // Cerrar dropdown al hacer clic en alguna opción
+                sportsDropdown.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        sportsDropdown.classList.remove('active');
+                        sportsMenuToggle.classList.remove('active');
+                    });
+                });
+            }
+
+            // Botón Volver Arriba
+            const backToTopButton = document.getElementById('backToTop');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 400) {
+                    backToTopButton.classList.add('visible');
+                } else {
+                    backToTopButton.classList.remove('visible');
+                }
+            });
+            backToTopButton.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            // Observer para animaciones en scroll
             const observer = new IntersectionObserver(entries => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -1113,6 +1176,12 @@
                 });
             }, { threshold: 0.05 });
             document.querySelectorAll('.section').forEach(s => observer.observe(s));
+        });
+
+        // Quitar Preloader (cuando carga todo)
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            preloader.classList.add('hidden');
         });
     </script>
 </body>
