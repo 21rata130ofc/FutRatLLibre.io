@@ -26,6 +26,7 @@
             --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
             --font-heading: 'Plus Jakarta Sans', sans-serif;
             --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --discord-blue: #5865f2;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -69,6 +70,262 @@
             content: ''; position: fixed; bottom: -10%; right: -10%; width: 50vw; height: 50vw;
             background: radial-gradient(circle, rgba(255, 87, 34, 0.04) 0%, transparent 70%);
             z-index: -1; pointer-events: none;
+        }
+
+        /* MODAL DE BIENVENIDA */
+        #welcomeModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        #welcomeModal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .welcome-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(4, 6, 10, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 10001;
+            background: linear-gradient(135deg, #0d121f 0%, #12182e 100%);
+            border: 1px solid rgba(255, 87, 34, 0.2);
+            border-radius: 24px;
+            padding: 0;
+            width: 90%;
+            max-width: 650px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 87, 34, 0.15);
+            animation: welcomeSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes welcomeSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .welcome-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 87, 34, 0.1);
+            border: 1px solid rgba(255, 87, 34, 0.2);
+            border-radius: 50%;
+            color: var(--text-main);
+            font-size: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+            font-weight: 300;
+            line-height: 1;
+        }
+
+        .welcome-close:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            transform: rotate(90deg);
+        }
+
+        .welcome-header {
+            background: linear-gradient(135deg, rgba(255, 87, 34, 0.1) 0%, rgba(255, 87, 34, 0.05) 100%);
+            border-bottom: 1px solid rgba(255, 87, 34, 0.15);
+            padding: 40px 40px 30px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .welcome-header i {
+            font-size: 2.5em;
+            color: var(--accent);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .welcome-header h2 {
+            font-family: var(--font-heading);
+            font-size: 2em;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+            background: linear-gradient(135deg, #ffffff 30%, #ff8a50 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-body {
+            padding: 40px;
+        }
+
+        .welcome-body > p {
+            color: var(--text-muted);
+            font-size: 1.05em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .welcome-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .feature {
+            background: rgba(255, 87, 34, 0.05);
+            border: 1px solid rgba(255, 87, 34, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: var(--transition-smooth);
+        }
+
+        .feature:hover {
+            background: rgba(255, 87, 34, 0.1);
+            border-color: rgba(255, 87, 34, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .feature i {
+            font-size: 1.8em;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .feature span {
+            color: var(--text-muted);
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        .discord-section {
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(88, 101, 242, 0.05) 100%);
+            border: 2px solid rgba(88, 101, 242, 0.3);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .discord-section h3 {
+            font-family: var(--font-heading);
+            font-size: 1.3em;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .discord-section h3 i {
+            color: var(--discord-blue);
+            font-size: 1.2em;
+        }
+
+        .discord-section > p {
+            color: var(--text-muted);
+            margin-bottom: 18px;
+            font-size: 0.95em;
+        }
+
+        .discord-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 36px;
+            background: linear-gradient(135deg, var(--discord-blue) 0%, #4752c4 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1em;
+            transition: var(--transition-smooth);
+            border: 2px solid rgba(88, 101, 242, 0.4);
+            box-shadow: 0 8px 20px rgba(88, 101, 242, 0.3);
+            margin-bottom: 12px;
+            display: inline-flex;
+        }
+
+        .discord-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(88, 101, 242, 0.5);
+            border-color: rgba(88, 101, 242, 0.6);
+        }
+
+        .discord-btn i {
+            font-size: 1.1em;
+        }
+
+        .discord-subtitle {
+            color: var(--text-muted);
+            font-size: 0.8em;
+            font-style: italic;
+        }
+
+        .welcome-footer {
+            display: flex;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 14px 24px;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            font-family: var(--font-sans);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--accent-glow);
         }
 
         /* HEADER & MENÚ */
@@ -295,8 +552,6 @@
             width: 100%;
         }
 
-
-
         .loading-spinner {
             display: flex; justify-content: center; align-items: center;
             padding: 40px; gap: 12px;
@@ -440,6 +695,15 @@
             .main-tabs { gap: 0; border-bottom: none; }
             .main-tab-btn { flex: 1; border-bottom: none; border-radius: 8px; padding: 12px 16px; font-size: 0.9em; }
             .main-tab-btn.active { background: var(--accent-gradient); color: white; border: none; }
+
+            .welcome-content {
+                width: 95%;
+                max-width: 100%;
+            }
+
+            .welcome-features {
+                grid-template-columns: 1fr;
+            }
         }
         @media (max-width: 480px) {
             .canales-grid { grid-template-columns: 1fr; }
@@ -447,12 +711,74 @@
             h1 { font-size: 1.5em; }
             .pais-tabs { width: 100%; }
             .pais-btn { flex: 1; justify-content: center; padding: 10px 14px; font-size: 0.8em; }
+
+            .welcome-header {
+                padding: 30px 24px 20px;
+            }
+
+            .welcome-body {
+                padding: 24px;
+            }
+
+            .welcome-header h2 {
+                font-size: 1.5em;
+            }
+
+            .discord-section {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
 
     <div id="preloader"><div class="spinner"></div></div>
+
+    <!-- MODAL DE BIENVENIDA -->
+    <div id="welcomeModal">
+        <div class="welcome-content">
+            <button class="welcome-close" onclick="closeWelcome()">&times;</button>
+            <div class="welcome-header">
+                <i class="fas fa-play-circle"></i>
+                <h2 id="welcomeTitle">¡Bienvenido a FutRatLibre!</h2>
+            </div>
+            <div class="welcome-body">
+                <p>Tu plataforma moderna para disfrutar del mejor fútbol y deportes en vivo sin interrupciones.</p>
+                <div class="welcome-features">
+                    <div class="feature">
+                        <i class="fas fa-globe"></i>
+                        <span>Transmisiones en vivo de las mejores ligas del mundo</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-tv"></i>
+                        <span>Múltiples canales de deportes variados</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Agenda actualizada de eventos del día</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-users"></i>
+                        <span>Comunidad activa compartiendo contenido</span>
+                    </div>
+                </div>
+                
+                <div class="discord-section">
+                    <h3><i class="fab fa-discord"></i> Únete a Nuestra Comunidad</h3>
+                    <p>¿Ideas, reporte de canales caídos o sugerencias? Comparte con nosotros en Discord:</p>
+                    <a href="https://discord.gg/r6QKKWD66w" target="_blank" rel="noopener noreferrer" class="discord-btn">
+                        <i class="fab fa-discord"></i> Ir al Discord
+                    </a>
+                    <p class="discord-subtitle">Aquí anunciamos actualizaciones, nuevos canales y escuchamos tus ideas</p>
+                </div>
+
+                <div class="welcome-footer">
+                    <button class="btn-primary" onclick="closeWelcome()">Entendido, Comencemos</button>
+                </div>
+            </div>
+        </div>
+        <div class="welcome-overlay" onclick="closeWelcome()"></div>
+    </div>
 
     <header>
         <h1 class="animate__animated animate__fadeInLeft"><i class="fas fa-play-circle"></i> FutRatLibre</h1>
@@ -777,11 +1103,11 @@
         <div id="otros-content" class="main-tab-content">
             <div id="eventos-container" style="width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid var(--border-color); background: white;">
                 <iframe 
-    id="daddyLiveFrame"
-    src="https://daddylive.org/" 
-    style="width: 100%; height: 900px; border: none; display: block; background: white; margin-top: -220px;"
-    title="DaddyLive - Eventos Populares">
-</iframe>
+                    id="daddyLiveFrame"
+                    src="https://daddylive.org/" 
+                    style="width: 100%; height: 900px; border: none; display: block; background: white; margin-top: -220px;"
+                    title="DaddyLive - Eventos Populares">
+                </iframe>
             </div>
         </div>
     </div>
@@ -863,6 +1189,27 @@
     <button id="backToTop" title="Volver Arriba"><i class="fas fa-arrow-up"></i></button>
 
     <script>
+        // Cerrar Modal de Bienvenida
+        function closeWelcome() {
+            const modal = document.getElementById('welcomeModal');
+            modal.classList.add('hidden');
+            // Guardar en localStorage que ya fue visto
+            localStorage.setItem('welcomeShown', 'true');
+        }
+
+        // Mostrar Modal de Bienvenida al cargar (solo si no ha sido visto)
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            preloader.classList.add('hidden');
+            
+            // Solo mostrar si es la primera vez
+            if (!localStorage.getItem('welcomeShown')) {
+                document.getElementById('welcomeModal').classList.remove('hidden');
+            } else {
+                document.getElementById('welcomeModal').classList.add('hidden');
+            }
+        });
+
         // Cambiar entre pestañas principales (Fútbol / Otros Deportes)
         function switchMainTab(tab) {
             // Ocultar todos los contenidos
@@ -1032,12 +1379,6 @@
                 navbar.querySelectorAll('a').forEach(el => el.classList.remove('active'));
                 link.classList.add('active');
             });
-        });
-
-        // Quitar Preloader
-        window.addEventListener('load', () => {
-            const preloader = document.getElementById('preloader');
-            preloader.classList.add('hidden');
         });
 
         // Botón Volver Arriba
