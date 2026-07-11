@@ -1146,18 +1146,49 @@
 
         <!-- SECCIÓN OTROS DEPORTES -->
         <div id="otros-content" class="main-tab-content">
-            <div id="eventos-container" style="width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid var(--border-color); background: white; position: relative;">
-                <button id="otrosFullscreenBtn" onclick="toggleOtrosFullscreen()" title="Pantalla Completa" style="position:absolute; top:12px; right:12px; z-index:10; background:var(--accent-gradient); color:#fff; border:none; border-radius:8px; padding:8px 14px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(0,0,0,0.4);">
-                    <i class="fas fa-expand"></i> Pantalla Completa
+            <!-- Tabs para subsecciones de Otros Deportes -->
+            <div class="pais-tabs" style="margin-bottom: 32px;">
+                <button class="pais-btn active" onclick="showOtrosSport('ufc')" style="flex:1;">
+                    <i class="fas fa-fist"></i> UFC
                 </button>
-                <iframe 
-                    id="daddyLiveFrame"
-                    src="https://daddylive.li/" 
-                    style="width: 100%; height: 900px; border: none; display: block; background: white; margin-top: -220px;"
-                    title="DaddyLive - Eventos Populares"
-                    allow="fullscreen"
-                    allowfullscreen>
-                </iframe>
+                <button class="pais-btn" onclick="showOtrosSport('eventos')" style="flex:1;">
+                    <i class="fas fa-calendar"></i> Eventos en Vivo
+                </button>
+            </div>
+
+            <!-- SECCIÓN UFC -->
+            <div id="ufc-panel" class="pais-panel active">
+                <div class="canales-grid">
+                    <div class="canal-card">
+                        <div class="canal-logo-wrap" style="background: linear-gradient(135deg, rgba(255,87,34,0.1) 0%, rgba(255,87,34,0.05) 100%);"><i class="fas fa-fist" style="font-size:3em; color:var(--accent); opacity:0.8;"></i></div>
+                        <div class="canal-name">UFC 1</div>
+                        <div class="canal-desc">Transmisión en vivo de peleas y eventos de UFC con la mejor calidad.</div>
+                        <button class="canal-btn" onclick="loadStream('ufc1')">Ver Canal</button>
+                    </div>
+                    <div class="canal-card">
+                        <div class="canal-logo-wrap" style="background: linear-gradient(135deg, rgba(255,87,34,0.1) 0%, rgba(255,87,34,0.05) 100%);"><i class="fas fa-fist" style="font-size:3em; color:var(--accent); opacity:0.8;"></i></div>
+                        <div class="canal-name">UFC 2</div>
+                        <div class="canal-desc">Señal alternativa con cobertura completa de combates internacionales.</div>
+                        <button class="canal-btn" onclick="loadStream('ufc2')">Ver Canal</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN EVENTOS EN VIVO (DaddyLive) -->
+            <div id="eventos-panel" class="pais-panel" style="display:none;">
+                <div id="eventos-container" style="width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid var(--border-color); background: white; position: relative;">
+                    <button id="otrosFullscreenBtn" onclick="toggleOtrosFullscreen()" title="Pantalla Completa" style="position:absolute; top:12px; right:12px; z-index:10; background:var(--accent-gradient); color:#fff; border:none; border-radius:8px; padding:8px 14px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(0,0,0,0.4);">
+                        <i class="fas fa-expand"></i> Pantalla Completa
+                    </button>
+                    <iframe 
+                        id="daddyLiveFrame"
+                        src="https://daddylive.li/" 
+                        style="width: 100%; height: 900px; border: none; display: block; background: white; margin-top: -220px;"
+                        title="DaddyLive - Eventos Populares"
+                        allow="fullscreen"
+                        allowfullscreen>
+                    </iframe>
+                </div>
             </div>
         </div>
     </div>
@@ -1280,6 +1311,24 @@
             }
         }
 
+        // Cambiar entre subsecciones de Otros Deportes (UFC vs Eventos)
+        function showOtrosSport(sport) {
+            document.querySelectorAll('.pais-panel').forEach(p => {
+                if (p.id === 'ufc-panel' || p.id === 'eventos-panel') {
+                    p.style.display = 'none';
+                }
+            });
+            document.querySelectorAll('.pais-tabs .pais-btn').forEach(b => b.classList.remove('active'));
+            
+            if (sport === 'ufc') {
+                document.getElementById('ufc-panel').style.display = 'block';
+            } else if (sport === 'eventos') {
+                document.getElementById('eventos-panel').style.display = 'block';
+            }
+            
+            event.currentTarget.classList.add('active');
+        }
+
         // Cambiar entre pestañas principales (Fútbol / Otros Deportes)
         function switchMainTab(tab) {
             // Ocultar todos los contenidos
@@ -1319,7 +1368,11 @@
 
         // Lógica de Tabs / Selección de países (Fútbol)
         function showPais(pais) {
-            document.querySelectorAll('.pais-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.pais-panel').forEach(p => {
+                if (p.id.startsWith('pais-')) {
+                    p.classList.remove('active');
+                }
+            });
             document.querySelectorAll('.pais-btn').forEach(b => b.classList.remove('active'));
             
             document.getElementById('pais-' + pais).classList.add('active');
@@ -1364,6 +1417,8 @@
 
         // Cuentas de Servidores Base64 Protegidos
         const _s = {
+            ufc1:     'https://sportspass.site/ufc/ufcstreams.html',
+            ufc2:     'https://tvv.goluchas.com/canal3/',
             espn:     atob('aHR0cHM6Ly9sYTEyaGQuY29tL3Zpdm8vY2FuYWxlcy5waHA/c3RyZWFtPWVzcG4='),
             laliga:   atob('aHR0cHM6Ly93d3cuY2Fwb3BsYXllci5uZXQvcGxheS9sYWxpZ2EzLnBocA=='),
             dsports:  atob('aHR0cHM6Ly9sYTIwaGQuY29tL3Zpdm8vY2FuYWxlcy5waHA/c3RyZWFtPWRzcG9ydHM='),
@@ -1407,7 +1462,7 @@
             winsports2:     atob('aHR0cHM6Ly9sYTIwaGQuY29tL3Zpdm8vY2FuYWxlcy5waHA/c3RyZWFtPXdpbnNwb3J0czI=')
         };
 
-        // Carga de Reproductor Seguro (Fútbol)
+        // Carga de Reproductor Seguro (Fútbol y UFC)
         function loadStream(key) {
             const container = document.getElementById('inicio');
             const player = document.getElementById('player');
