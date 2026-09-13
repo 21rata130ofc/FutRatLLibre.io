@@ -842,7 +842,7 @@
                 allowfullscreen
                 loading="lazy"
                 title="Partidos de hoy"
-                sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-top-navigation"
             ></iframe>
         </div>
         <button class="agenda-reload-btn" onclick="reloadAgenda()">
@@ -1270,20 +1270,93 @@
     <button id="backToTop" title="Volver Arriba"><i class="fas fa-arrow-up"></i></button>
 
     <script>
+        // ===== BLOQUEO DE REDIRECCIONES A block.html =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const agendaFrame = document.getElementById('agendaFrame');
+            let lastSrc = agendaFrame.src;
+            
+            // Método 1: Monitorear cambios de src
+            const checkInterval = setInterval(function() {
+                try {
+                    if (agendaFrame.src !== lastSrc) {
+                        if (agendaFrame.src.includes('block.html')) {
+                            console.log('⚠️ Intento de redirección bloqueado: block.html');
+                            agendaFrame.src = 'https://la18hd.su/eventos/';
+                        }
+                        lastSrc = agendaFrame.src;
+                    }
+                } catch(e) {
+                    // CORS error, ignorar
+                }
+            }, 500);
+            
+            // Método 2: Monitorear con MutationObserver
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'src') {
+                        if (agendaFrame.src.includes('block.html')) {
+                            console.log('⚠️ Bloqueo detectado por MutationObserver');
+                            agendaFrame.src = 'https://la18hd.su/eventos/';
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(agendaFrame, { attributes: true, attributeFilter: ['src'] });
+            
+            // Método 3: Inyectar script en el iframe después de cargar
+            agendaFrame.addEventListener('load', function() {
+                try {
+                    const iframeDoc = agendaFrame.contentDocument || agendaFrame.contentWindow.document;
+                    const iframeWin = agendaFrame.contentWindow;
+                    
+                    // Bloquear navegación dentro del iframe
+                    if (iframeWin) {
+                        iframeWin.addEventListener('beforeunload', function(e) {
+                            if (iframeWin.location.href.includes('block.html')) {
+                                console.log('⚠️ Navegación bloqueada dentro del iframe');
+                                e.preventDefault();
+                                return false;
+                            }
+                        });
+                        
+                        // Interceptar clicks que lleven a block.html
+                        const originalHref = Object.getOwnPropertyDescriptor(iframeWin.Location.prototype, 'href').set;
+                        Object.defineProperty(iframeWin.Location.prototype, 'href', {
+                            set: function(val) {
+                                if (typeof val === 'string' && val.includes('block.html')) {
+                                    console.log('⚠️ Intento de redirección a block.html bloqueado');
+                                    return;
+                                }
+                                originalHref.call(this, val);
+                            }
+                        });
+                    }
+                } catch(err) {
+                    // Errores de CORS son normales, no hacer nada
+                }
+            });
+            
+            // Limpieza
+            window.addEventListener('beforeunload', function() {
+                clearInterval(checkInterval);
+                observer.disconnect();
+            });
+        });
+        // ===== FIN BLOQUEO =====
+
         // Cerrar Modal de Bienvenida
         function closeWelcome() {
             const modal = document.getElementById('welcomeModal');
             modal.classList.add('hidden');
-            // Guardar en localStorage que ya fue visto
             localStorage.setItem('welcomeShown', 'true');
         }
 
-        // Mostrar Modal de Bienvenida al cargar (solo si no ha sido visto)
+        // Mostrar Modal de Bienvenida al cargar
         window.addEventListener('load', () => {
             const preloader = document.getElementById('preloader');
             preloader.classList.add('hidden');
             
-            // Solo mostrar si es la primera vez
             if (!localStorage.getItem('welcomeShown')) {
                 document.getElementById('welcomeModal').classList.remove('hidden');
             } else {
@@ -1311,7 +1384,7 @@
             }
         }
 
-        // Cambiar entre subsecciones de Otros Deportes (UFC vs Eventos)
+        // Cambiar entre subsecciones de Otros Deportes
         function showOtrosSport(sport) {
             document.querySelectorAll('.pais-panel').forEach(p => {
                 if (p.id === 'ufc-panel' || p.id === 'eventos-panel') {
@@ -1329,35 +1402,27 @@
             event.currentTarget.classList.add('active');
         }
 
-        // Cambiar entre pestañas principales (Fútbol / Otros Deportes)
+        // Cambiar entre pestañas principales
         function switchMainTab(tab) {
-            // Ocultar todos los contenidos
             document.querySelectorAll('.main-tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             
-            // Actualizar botones del header
             document.querySelectorAll('.header-tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // Actualizar botones de las pestañas dentro de la sección
             document.querySelectorAll('.main-tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
 
-            // Mostrar el contenido seleccionado
             document.getElementById(tab + '-content').classList.add('active');
-            
-            // Activar botón del header
             document.getElementById('header-tab-' + tab).classList.add('active');
             
-            // Activar botón dentro de la sección
             if (document.getElementById('tab-' + tab)) {
                 document.getElementById('tab-' + tab).classList.add('active');
             }
 
-            // Mostrar/Ocultar Agenda según la pestaña
             const agendaSection = document.querySelector('.agenda-section');
             if (tab === 'futbol') {
                 agendaSection.style.display = 'block';
@@ -1366,7 +1431,7 @@
             }
         }
 
-        // Lógica de Tabs / Selección de países (Fútbol)
+        // Lógica de Tabs
         function showPais(pais) {
             document.querySelectorAll('.pais-panel').forEach(p => {
                 if (p.id.startsWith('pais-')) {
@@ -1379,7 +1444,7 @@
             event.currentTarget.classList.add('active');
         }
 
-        // Mostrar / Ocultar Información con animación suave
+        // Mostrar / Ocultar Información
         function toggleInfo() {
             const panel = document.getElementById('infoPanel');
             const btn = document.getElementById('infoToggleBtn');
@@ -1406,6 +1471,7 @@
                 document.getElementById('modalOverlay').classList.add('active');
             }, 10);
         }
+        
         function hideContact() {
             document.getElementById('contactModal').classList.remove('active');
             document.getElementById('modalOverlay').classList.remove('active');
@@ -1415,7 +1481,7 @@
             }, 300);
         }
 
-        // Cuentas de Servidores Base64 Protegidos
+        // Cuentas de Servidores
         const _s = {
             ufc1:     'https://sportspass.site/ufc/ufcstreams.html',
             ufc2:     'https://tvv.goluchas.com/canal3/',
@@ -1462,7 +1528,7 @@
             winsports2:     atob('aHR0cHM6Ly9sYTIwaGQuY29tL3Zpdm8vY2FuYWxlcy5waHA/c3RyZWFtPXdpbnNwb3J0czI=')
         };
 
-        // Carga de Reproductor Seguro (Fútbol y UFC)
+        // Carga de Reproductor
         function loadStream(key) {
             const container = document.getElementById('inicio');
             const player = document.getElementById('player');
@@ -1479,7 +1545,7 @@
             container.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        // Recargar el iframe de la agenda diaria
+        // Recargar agenda
         function reloadAgenda() {
             const frame = document.getElementById('agendaFrame');
             const icon = document.querySelector('.agenda-reload-btn i');
@@ -1490,7 +1556,7 @@
             setTimeout(() => { icon.style.transform = 'rotate(0deg)'; }, 800);
         }
 
-        // Navegación en Dispositivos Móviles (Hamburgo)
+        // Navegación Mobile
         document.addEventListener('DOMContentLoaded', () => {
             const hamburger = document.getElementById('hamburger');
             const navbar = document.getElementById('navbar');
@@ -1500,18 +1566,15 @@
                 hamburger.classList.toggle('active');
             });
 
-            // Evento de Cierre del Menú Móvil tras hacer clic
             navbar.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', () => {
                     navbar.classList.remove('active');
                     hamburger.classList.remove('active');
-
                     navbar.querySelectorAll('a').forEach(el => el.classList.remove('active'));
                     link.classList.add('active');
                 });
             });
 
-            // Observer para animaciones en scroll
             const observer = new IntersectionObserver(entries => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
